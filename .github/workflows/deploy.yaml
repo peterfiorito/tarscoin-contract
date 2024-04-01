@@ -1,0 +1,40 @@
+name: Manual Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        description: 'Deployment Network'
+        type: choice
+        options:
+          - testnet
+          - mainnet
+        required: true
+        default: 'testnet'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'  # Adjust based on your project's Node.js version
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Deploy to Testnet
+        if: ${{ github.event.inputs.network == 'testnet' }}
+        env:
+          WALLET_KEY: ${{ secrets.TEST_WALLET_KEY }}
+        run: npm run deploy:goerli
+
+      - name: Deploy to Mainnet
+        if: ${{ github.event.inputs.network == 'mainnet' }}
+        env:
+          WALLET_KEY: ${{ secrets.PROD_WALLET_KEY }}
+        run: npm run deploy:mainnet
