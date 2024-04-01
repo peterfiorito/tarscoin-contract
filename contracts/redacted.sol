@@ -24,12 +24,13 @@ interface IUniswapV2Router02 {
   ) external payable returns (uint amountToken, uint amountETH, uint liquidity);
 }
 
-contract TARSCoin is ERC20, Ownable, Pausable {
+contract TARSCoin is ERC20, Ownable, Pausable, ReentrancyGuard {
   mapping(address => uint256) private _lastReceivedTime;
+  event LiquidityAdded(uint amountToken, uint amountETH, uint liquidity);
   uint256 public constant HOLD_PERIOD = 1 days;
   bool public tradingOpen = false;
-  uint256 public constant MAX_SUPPLY = 1000000 * (10 ** 18);
-  address public UNISWAP_V2_ROUTER = 0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD;
+  uint256 public constant MAX_SUPPLY = 1_000_000 * 1e18;
+  address public uniswapV2Router = 0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD;
 
   constructor(
     uint256 initialSupply
@@ -52,7 +53,10 @@ contract TARSCoin is ERC20, Ownable, Pausable {
 
     // Bypass the hold period check if the operation is a burn (to == address(0))
     if (to != address(0)) {
-      require(block.timestamp - _lastReceivedTime[from] >= HOLD_PERIOD, "TARSCoin: transfer not allowed yet");
+      require(
+        block.timestamp - _lastReceivedTime[from] >= HOLD_PERIOD,
+        "TARSCoin: transfer not allowed yet"
+      );
     }
 
     super._update(from, to, value);
@@ -102,20 +106,22 @@ contract TARSCoin is ERC20, Ownable, Pausable {
 
   // Liquidity
   function setUniswapRouter(address routerAddress) public onlyOwner {
-    UNISWAP_V2_ROUTER = routerAddress;
+    require(
+      routerAddress != address(0),
+      "TARSCoin: routerAddress is the zero address"
+    );
+    uniswapV2Router = routerAddress;
   }
 
   function addLiquidityToUniswap(
     uint256 tokenAmount,
     uint256 ethAmount
-  ) public onlyOwner {
-    IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(UNISWAP_V2_ROUTER);
-
-    // Approve token transfer to cover all possible scenarios
+  ) public onlyOwner nonReentrant {
+    IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(uniswapV2Router);
     _approve(address(this), address(uniswapRouter), tokenAmount);
 
-    // Add the liquidity
-    uniswapRouter.addLiquidityETH{ value: ethAmount }(
+    (uint amountToken, uint amountETH, uint liquidity) = uniswapRouter
+      .addLiquidityETH{ value: ethAmount }(
       address(this),
       tokenAmount,
       0,
@@ -123,6 +129,8 @@ contract TARSCoin is ERC20, Ownable, Pausable {
       owner(),
       block.timestamp
     );
+
+    emit LiquidityAdded(amountToken, amountETH, liquidity);
   }
 
   function mint(address to, uint256 amount) public onlyOwner {
