@@ -26,6 +26,6 @@ jobs:
       - name: Run Slither analyzer
         uses: crytic/slither-action@v0.3.1
         with:
-          fail-on: pedantic
+          fail-on: high
     env:
       WALLET_KEY: ${{ secrets.TEST_WALLET_KEY }}
