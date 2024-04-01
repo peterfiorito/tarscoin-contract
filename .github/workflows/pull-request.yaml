@@ -27,3 +27,5 @@ jobs:
         uses: crytic/slither-action@v0.3.1
         with:
           fail-on: pedantic
+    env:
+      WALLET_KEY: ${{ secrets.TEST_WALLET_KEY }}
