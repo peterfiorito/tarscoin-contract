@@ -1,9 +1,5 @@
 # TARS Coin - A Base Network Token
 
-Inspired in the documentary 'Idiocracy'.
-
-> There are plenty of **REDACTEDS** out there living really kick ass lives. My first wife was **REDACTED**. She's a pilot now.
-
 ![tars coin icon](https://github.com/peterfiorito/tarscoin-contract/blob/main/tars-icon.png?raw=true)
 
 
