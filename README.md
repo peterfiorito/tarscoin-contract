@@ -1,8 +1,5 @@
 # TARS Coin - A Base Network Token
 
-![tars coin icon](https://github.com/peterfiorito/tarscoin-contract/blob/main/tars-icon.png?raw=true)
-
-
 If everyone is willing to pile on on complete scam coins, might as well give them one that is not a rug pull.
 
 I have no interest in making money out of it, and to be frank I'll probably just deploy this for fun.
